@@ -1,4 +1,4 @@
-package dev.thecoolerzubumafu.create_workbench;
+package dev.thecoolerzubumafu.createworkbench;
 
 import java.util.List;
 import java.util.Set;
