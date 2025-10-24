@@ -1,7 +1,7 @@
 package dev.thecoolerzubumafu.createworkbench;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.world.item.CreativeModeTabs;
+import com.simibubi.create.AllCreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -25,6 +25,7 @@ public class CreateWorkbench {
         NeoForge.EVENT_BUS.register(this);
 
         AllItems.register(modEventBus);
+        AllBlocks.register(modEventBus);
 
         modEventBus.addListener(this::addCreative);
 
@@ -35,8 +36,9 @@ public class CreateWorkbench {
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+        if (event.getTabKey() == AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey()) {
             event.accept(AllItems.WORKBENCH_KEY);
+            event.accept(AllBlocks.WORKBENCH);
         }
     }
 

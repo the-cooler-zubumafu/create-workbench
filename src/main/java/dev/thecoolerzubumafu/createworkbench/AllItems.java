@@ -10,7 +10,7 @@ public class AllItems {
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CreateWorkbench.MOD_ID);
 
     public static final DeferredItem<Item> WORKBENCH_KEY = ITEMS.register(
-            Items.WORKBENCH_KEY.key,
+            Items.WORKBENCH_KEY.value,
             () -> new Item(new Item.Properties())
     );
 
@@ -21,10 +21,10 @@ public class AllItems {
     enum Items {
         WORKBENCH_KEY("workbench_key");
 
-        private final String key;
+        private final String value;
 
-        Items(String key) {
-            this.key = key;
+        Items(String value) {
+            this.value = value;
         }
     }
 

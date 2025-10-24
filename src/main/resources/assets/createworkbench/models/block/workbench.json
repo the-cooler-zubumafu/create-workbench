@@ -3,7 +3,7 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "createworkbench:block/workbench/workbench",
+		"0": "createworkbench:block/workbench",
 		"particle": "block/dark_oak_planks"
 	},
 	"elements": [
