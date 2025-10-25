@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NN",
+    "NN",
+    " I"
+  ],
+  "key": {
+    "N": {
+      "item": "create:brass_nugget"
+    },
+    "I": {
+      "item": "create:brass_ingot"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "createworkbench:workbench_key"
+  }
+}
