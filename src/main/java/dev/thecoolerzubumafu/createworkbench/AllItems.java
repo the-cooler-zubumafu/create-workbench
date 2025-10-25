@@ -11,7 +11,10 @@ public class AllItems {
 
     public static final DeferredItem<Item> WORKBENCH_KEY = ITEMS.register(
             Items.WORKBENCH_KEY.value,
-            () -> new Item(new Item.Properties())
+            () -> new Item(
+                    new Item.Properties()
+                            .stacksTo(1)
+            )
     );
 
     public static void register(IEventBus eventBus) {

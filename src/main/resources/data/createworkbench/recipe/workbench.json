@@ -8,10 +8,10 @@
   ],
   "key": {
     "T": {
-      "tag": "createworkbench:table_cloths"
+      "tag": "create:table_cloths"
     },
     "B": {
-      "tag": "createworkbench:toolboxes"
+      "tag": "create:toolboxes"
     },
     "K": {
       "item": "create:andesite_alloy_block"

@@ -34,7 +34,11 @@ public class AllBlocks {
     private static <T extends Block> void registerBlockItem(String name, DeferredBlock<T> block) {
         AllItems.ITEMS.register(
                 name,
-                () -> new BlockItem(block.get(), new Item.Properties())
+                () -> new BlockItem(
+                        block.get(),
+                        new Item.Properties()
+                                .stacksTo(1)
+                )
         );
     }
 
