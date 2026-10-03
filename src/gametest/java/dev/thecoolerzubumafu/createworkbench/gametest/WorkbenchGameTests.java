@@ -2,10 +2,13 @@ package dev.thecoolerzubumafu.createworkbench.gametest;
 
 import dev.thecoolerzubumafu.createworkbench.AllBlocks;
 import dev.thecoolerzubumafu.createworkbench.AllDataComponents;
+import dev.thecoolerzubumafu.createworkbench.AllItems;
 import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchBlockEntity;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContents;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContentsMenu;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchHandler;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchKeyItem;
 
 import java.util.Map;
 import java.util.UUID;
@@ -254,6 +257,164 @@ public class WorkbenchGameTests {
 			.equals("My Tools"), "expected the toolbox name to title the screen");
 		helper.assertTrue(menu.contentHolder.getBlockPos()
 			.equals(helper.absolutePos(pos)), "expected the contents holder at the workbench position");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void lockingRequiresAMatchingKey(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		helper.assertTrue(be.toggleLock(key), "sneak-right-click with a key should lock an unlocked workbench");
+		helper.assertTrue(be.isLocked(), "the workbench should now be locked");
+		helper.assertTrue(WorkbenchKeyItem.lockIdOf(key) != null, "the key should receive the new lock id");
+
+		helper.assertTrue(!be.canAccess(helper.makeMockPlayer(GameType.SURVIVAL)),
+			"a player without the key must be denied");
+
+		Player holder = helper.makeMockPlayer(GameType.SURVIVAL);
+		holder.getInventory()
+			.setItem(0, key);
+		helper.assertTrue(be.canAccess(holder), "the key holder must be granted access");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void matchingKeyUnlocksAGain(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		be.toggleLock(key);
+
+		helper.assertTrue(be.toggleLock(key), "the matching key should unlock the workbench");
+		helper.assertTrue(!be.isLocked(), "the workbench should be unlocked");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void aDifferentKeyCannotUnlock(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		be.toggleLock(key);
+
+		ItemStack otherKey = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		WorkbenchKeyItem.setLockId(otherKey, UUID.randomUUID());
+		helper.assertTrue(!be.toggleLock(otherKey), "a non-matching key must not toggle the lock");
+		helper.assertTrue(be.isLocked(), "the workbench should stay locked");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void lockPersistsAcrossReload(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		UUID lockId = UUID.randomUUID();
+		be.restoreLock(lockId);
+
+		CompoundTag saved = be.saveWithoutMetadata(helper.getLevel()
+			.registryAccess());
+		WorkbenchBlockEntity restored = new WorkbenchBlockEntity(pos, be.getBlockState());
+		restored.loadWithComponents(saved, helper.getLevel()
+			.registryAccess());
+
+		helper.assertTrue(restored.isLocked(), "the lock should survive a save/load round-trip");
+		helper.assertTrue(restored.grantsAccess(lockId), "the lock id should be retained");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void restockReplenishesTheBoundHotbarSlot(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		ToolboxInventory inventory = new ToolboxInventory(null);
+		inventory.setStackInSlot(0, new ItemStack(Items.DIAMOND, 64));
+		be.storage()
+			.setAt(0, new StoredToolbox(inventory, DyeColor.BLUE, UUID.randomUUID()));
+
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.getInventory()
+			.setItem(0, ItemStack.EMPTY);
+
+		helper.assertTrue(!WorkbenchHandler.restock(player, be, 0, 0, 0),
+			"a still-valid binding should stay bound");
+		ItemStack hotbar = player.getInventory()
+			.getItem(0);
+		helper.assertTrue(hotbar.is(Items.DIAMOND) && hotbar.getCount() == 32,
+			"expected the bound slot to be topped up to half a stack, got " + hotbar);
+		helper.assertTrue(be.storage()
+			.get(0)
+			.inventory()
+			.getStackInSlot(0)
+			.getCount() == 32, "expected the compartment to be drained in step");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void restockDropsBindingsToMissingToolboxes(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+		helper.assertTrue(WorkbenchHandler.restock(player, be, 3, 0, 0),
+			"a binding to an empty Slot has nothing to restock and should be dropped");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void depositFillsDefinedCompartments(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		ToolboxInventory inventory = new ToolboxInventory(null);
+		inventory.setStackInSlot(0, new ItemStack(Items.DIAMOND, 1));
+		be.storage()
+			.setAt(0, new StoredToolbox(inventory, DyeColor.BLUE, UUID.randomUUID()));
+
+		ItemStack remainder = WorkbenchHandler.deposit(be, new ItemStack(Items.DIAMOND, 10));
+
+		helper.assertTrue(remainder.isEmpty(), "the defined compartment should accept all ten diamonds");
+		helper.assertTrue(be.storage()
+			.get(0)
+			.inventory()
+			.getStackInSlot(0)
+			.getCount() == 11, "the compartment should hold the deposited diamonds");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void nearestListsOnlyAccessibleWorkbenches(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		WorkbenchHandler.onLoad(be);
+
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		BlockPos abs = helper.absolutePos(pos);
+		player.setPos(abs.getX() + 0.5, abs.getY(), abs.getZ() + 0.5);
+		helper.assertTrue(WorkbenchHandler.getNearest(player.level(), player, 8)
+			.contains(be), "an unlocked workbench should be listed");
+
+		UUID lockId = UUID.randomUUID();
+		be.restoreLock(lockId);
+		helper.assertTrue(!WorkbenchHandler.getNearest(player.level(), player, 8)
+			.contains(be), "a locked workbench is hidden from players without the key");
+
+		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		WorkbenchKeyItem.setLockId(key, lockId);
+		player.getInventory()
+			.setItem(0, key);
+		helper.assertTrue(WorkbenchHandler.getNearest(player.level(), player, 8)
+			.contains(be), "the key holder should see the locked workbench");
 		helper.succeed();
 	}
 }

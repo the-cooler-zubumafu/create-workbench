@@ -7,9 +7,12 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchHandler;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.slf4j.Logger;
 
 @Mod(CreateWorkbench.ID)
@@ -29,7 +32,9 @@ public class CreateWorkbench {
         AllBlockEntities.register(modEventBus);
         AllDataComponents.register(modEventBus);
         AllMenuTypes.register(modEventBus);
+        AllMountedStorageTypes.register(modEventBus);
         modEventBus.addListener(AllPackets::register);
+        modEventBus.addListener(AllBlockEntities::registerCapabilities);
 
         modEventBus.addListener(this::addCreative);
 
@@ -37,6 +42,7 @@ public class CreateWorkbench {
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(AllMountedStorageTypes::associateBlocks);
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
@@ -50,5 +56,15 @@ public class CreateWorkbench {
     public void onServerStarting(ServerStartingEvent event) {
         // Do something when the server starts
         LOGGER.info("HELLO from server starting");
+    }
+
+    @SubscribeEvent
+    public void onPlayerTick(PlayerTickEvent.Post event) {
+        WorkbenchHandler.entityTick(event.getEntity(), event.getEntity().level());
+    }
+
+    @SubscribeEvent
+    public void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        WorkbenchHandler.playerLogin(event.getEntity());
     }
 }

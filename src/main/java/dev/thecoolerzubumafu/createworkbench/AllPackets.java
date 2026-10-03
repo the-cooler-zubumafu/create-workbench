@@ -17,6 +17,16 @@ public class AllPackets {
                 OpenWorkbenchMenuPacket.STREAM_CODEC,
                 OpenWorkbenchMenuPacket::handle
         );
+        registrar.playToServer(
+                WorkbenchEquipPacket.TYPE,
+                WorkbenchEquipPacket.STREAM_CODEC,
+                WorkbenchEquipPacket::handle
+        );
+        registrar.playToServer(
+                WorkbenchDisposeAllPacket.TYPE,
+                WorkbenchDisposeAllPacket.STREAM_CODEC,
+                WorkbenchDisposeAllPacket::handle
+        );
     }
 
 }

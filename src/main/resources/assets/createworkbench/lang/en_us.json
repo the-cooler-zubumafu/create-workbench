@@ -1,5 +1,9 @@
 {
   "item.createworkbench.workbench_key": "Workbench Key",
   "block.createworkbench.workbench": "Workbench",
-  "creativetab.createworkbench.workbench": "Create: Workbench"
+  "creativetab.createworkbench.workbench": "Create: Workbench",
+  "createworkbench.workbench.locked": "Locked",
+  "createworkbench.workbench.unlocked": "Unlocked",
+  "key.createworkbench.open_radial": "Open Workbench Radial",
+  "key.categories.createworkbench": "Create: Workbench"
 }
