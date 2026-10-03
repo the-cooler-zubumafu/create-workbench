@@ -1,6 +1,8 @@
 package dev.thecoolerzubumafu.createworkbench.content.equipment.workbench;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.UUID;
@@ -35,5 +37,26 @@ class WorkbenchLockTest {
 		lock.unlock();
 
 		assertTrue(lock.grantsAccess(null));
+	}
+
+	@Test
+	void lockRetainsItsIdAndNameUntilUnlocked() {
+		WorkbenchLock lock = new WorkbenchLock();
+		assertFalse(lock.isLocked());
+		assertNull(lock.lockId());
+		assertNull(lock.lockerName());
+
+		UUID id = UUID.randomUUID();
+		lock.lock(id, "Alice");
+
+		assertTrue(lock.isLocked());
+		assertEquals(id, lock.lockId());
+		assertEquals("Alice", lock.lockerName());
+
+		lock.unlock();
+
+		assertFalse(lock.isLocked());
+		assertNull(lock.lockId());
+		assertNull(lock.lockerName());
 	}
 }

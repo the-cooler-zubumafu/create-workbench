@@ -4,87 +4,56 @@ import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
+/**
+ * Minecraft/NeoForge adapter over the pure {@link WorkbenchSlotItems} rules.
+ */
 public class WorkbenchItemHandler implements IItemHandlerModifiable {
 
-	private final WorkbenchStorage storage;
-	private final Runnable onChanged;
+	private final WorkbenchSlotItems<ItemStack, StoredToolbox> rules;
 
 	public WorkbenchItemHandler(WorkbenchStorage storage, Runnable onChanged) {
-		this.storage = storage;
-		this.onChanged = onChanged;
+		this.rules = new WorkbenchSlotItems<>(storage, new ToolboxItemAdapter(), onChanged);
 	}
 
 	@Override
 	public int getSlots() {
-		return WorkbenchStorage.CAPACITY;
+		return rules.getSlots();
 	}
 
 	@Override
 	public ItemStack getStackInSlot(int slot) {
-		StoredToolbox toolbox = storage.get(slot);
-		return toolbox == null ? ItemStack.EMPTY : ToolboxItems.restore(toolbox);
+		return rules.getStackInSlot(slot);
 	}
 
 	@Override
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-		if (stack.isEmpty())
-			return ItemStack.EMPTY;
-		if (slot < 0 || slot >= getSlots() || storage.get(slot) != null) {
-			CreateWorkbench.LOGGER.debug("Workbench insert rejected: slot {} occupied or out of range", slot);
-			return stack;
-		}
-		StoredToolbox toolbox = ToolboxItems.snapshot(stack);
-		if (toolbox == null) {
-			CreateWorkbench.LOGGER.debug("Workbench insert rejected: slot {} (not a toolbox)", slot);
-			return stack;
-		}
-		if (!simulate) {
-			storage.insertAt(slot, toolbox);
-			CreateWorkbench.LOGGER.debug("Workbench inserted toolbox into slot {} (color={})", slot, toolbox.color());
-			onChanged.run();
-		}
-		return ItemStack.EMPTY;
+		ItemStack remainder = rules.insertItem(slot, stack, simulate);
+		if (!simulate && remainder.isEmpty() && !stack.isEmpty())
+			CreateWorkbench.LOGGER.debug("Workbench inserted a toolbox into slot {}", slot);
+		return remainder;
 	}
 
 	@Override
 	public ItemStack extractItem(int slot, int amount, boolean simulate) {
-		StoredToolbox toolbox = storage.get(slot);
-		if (toolbox == null || amount <= 0)
-			return ItemStack.EMPTY;
-		if (simulate)
-			return ToolboxItems.restore(toolbox);
-		StoredToolbox removed = storage.remove(slot);
-		CreateWorkbench.LOGGER.debug("Workbench extracted toolbox from slot {}", slot);
-		onChanged.run();
-		return removed == null ? ItemStack.EMPTY : ToolboxItems.restore(removed);
+		ItemStack result = rules.extractItem(slot, amount, simulate);
+		if (!simulate && !result.isEmpty())
+			CreateWorkbench.LOGGER.debug("Workbench extracted a toolbox from slot {}", slot);
+		return result;
 	}
 
 	@Override
 	public void setStackInSlot(int slot, ItemStack stack) {
-		if (slot < 0 || slot >= getSlots())
-			return;
-		if (stack.isEmpty()) {
-			storage.remove(slot);
-			CreateWorkbench.LOGGER.debug("Workbench cleared slot {}", slot);
-		} else {
-			StoredToolbox toolbox = ToolboxItems.snapshot(stack);
-			if (toolbox == null) {
-				CreateWorkbench.LOGGER.debug("Workbench setStackInSlot ignored: slot {} (not a toolbox)", slot);
-				return;
-			}
-			storage.setAt(slot, toolbox);
-			CreateWorkbench.LOGGER.debug("Workbench set slot {} (color={})", slot, toolbox.color());
-		}
-		onChanged.run();
+		rules.setStackInSlot(slot, stack);
+		CreateWorkbench.LOGGER.debug("Workbench set slot {}", slot);
 	}
 
 	@Override
 	public int getSlotLimit(int slot) {
-		return 1;
+		return rules.getSlotLimit(slot);
 	}
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		return ToolboxItems.snapshot(stack) != null;
+		return rules.isItemValid(slot, stack);
 	}
 }

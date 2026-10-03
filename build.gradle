@@ -131,6 +131,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 // "optional", meaning it will not be pulled by dependents of this mod.
 configurations {
     runtimeClasspath.extendsFrom localRuntime
+    pitestTool
 }
 
 dependencies {
@@ -164,6 +165,11 @@ dependencies {
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")
+
+    pitestTool("org.pitest:pitest-command-line:1.20.2")
+    pitestTool("org.pitest:pitest-junit5-plugin:1.2.3")
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -212,6 +218,50 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.named('test', Test).configure {
     useJUnitPlatform()
+}
+
+// PIT mutation testing over the pure logic. Runs via pitest-command-line because the
+// PIT Gradle plugin is incompatible with Gradle 9. Minecraft is on the classpath but the
+// targeted logic and its tests must not touch it.
+def mutationThreshold = project.findProperty('mutationThreshold') ?: '90'
+def pitVerbose = project.findProperty('pitVerbose') ?: 'false'
+
+tasks.register('mutationTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs PIT mutation testing over the pure logic.'
+    dependsOn tasks.named('classes'), tasks.named('testClasses')
+
+    // Exclude NeoForge's JUnit launcher (junit-fml): it boots Minecraft in the minion,
+    // which the pure logic and its tests do not need.
+    def projectClasspath = files(sourceSets.main.runtimeClasspath, sourceSets.test.runtimeClasspath)
+            .filter { !it.name.startsWith('junit-fml') }
+    classpath = configurations.pitestTool + projectClasspath
+    mainClass = 'org.pitest.mutationtest.commandline.MutationCoverageReport'
+
+    def reportDir = layout.buildDirectory.dir('reports/pitest')
+    outputs.dir(reportDir)
+
+    args = [
+            '--reportDir', reportDir.get().asFile.absolutePath,
+            '--targetClasses', [
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlots',
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlotItems',
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchLock',
+            ].join(','),
+            '--targetTests', [
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlotsTest',
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlotItemsTest',
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchLockTest',
+            ].join(','),
+            '--sourceDirs', 'src/main/java',
+            '--classPath', projectClasspath.asPath,
+            '--outputFormats', 'HTML,XML',
+            '--timestampedReports', 'false',
+            '--threads', '4',
+            '--mutationThreshold', mutationThreshold.toString(),
+            '--failWhenNoMutations', 'false',
+            '--verbose', pitVerbose.toString(),
+    ]
 }
 
 // IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
