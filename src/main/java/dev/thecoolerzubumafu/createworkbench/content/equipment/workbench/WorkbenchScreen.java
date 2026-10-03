@@ -8,7 +8,11 @@ import com.simibubi.create.foundation.gui.widget.IconButton;
 import dev.thecoolerzubumafu.createworkbench.OpenWorkbenchToolboxPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class WorkbenchScreen extends AbstractSimiContainerScreen<WorkbenchMenu> {
@@ -55,9 +59,23 @@ public class WorkbenchScreen extends AbstractSimiContainerScreen<WorkbenchMenu> 
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		if (button == 0 && hasControlDown() && hoveredSlot != null
 				&& hoveredSlot.index < WorkbenchStorage.CAPACITY && hoveredSlot.hasItem()) {
+			playSelectSound();
 			PacketDistributor.sendToServer(new OpenWorkbenchToolboxPacket(menu.workbenchPos(), hoveredSlot.index));
 			return true;
 		}
 		return super.mouseClicked(mouseX, mouseY, button);
+	}
+
+	private void playSelectSound() {
+		if (minecraft == null || minecraft.level == null)
+			return;
+		Vec3 center = Vec3.atCenterOf(menu.workbenchPos());
+		playAt(center, SoundEvents.IRON_DOOR_OPEN, 0.25F, 1.2F);
+		playAt(center, SoundEvents.CHEST_OPEN, 0.1F, 1.1F);
+	}
+
+	private void playAt(Vec3 pos, SoundEvent sound, float volume, float basePitch) {
+		minecraft.level.playLocalSound(pos.x, pos.y, pos.z, sound, SoundSource.BLOCKS, volume,
+			minecraft.level.random.nextFloat() * 0.1F + basePitch, true);
 	}
 }
