@@ -12,10 +12,10 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.slf4j.Logger;
 
-@Mod(CreateWorkbench.MOD_ID)
+@Mod(CreateWorkbench.ID)
 public class CreateWorkbench {
 
-    public static final String MOD_ID = "createworkbench";
+    public static final String ID = "createworkbench";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public CreateWorkbench(IEventBus modEventBus, ModContainer modContainer) {
@@ -26,6 +26,8 @@ public class CreateWorkbench {
         AllCreativeModeTabs.register(modEventBus);
         AllItems.register(modEventBus);
         AllBlocks.register(modEventBus);
+        AllBlockEntities.register(modEventBus);
+        AllDataComponents.register(modEventBus);
 
         modEventBus.addListener(this::addCreative);
 

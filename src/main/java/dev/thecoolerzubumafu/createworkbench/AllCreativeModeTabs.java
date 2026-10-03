@@ -13,7 +13,7 @@ public class AllCreativeModeTabs {
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister.create(
             Registries.CREATIVE_MODE_TAB,
-            CreateWorkbench.MOD_ID
+            CreateWorkbench.ID
     );
 
     public static final Supplier<CreativeModeTab> CREATE_WORKBENCH_TAB = CREATIVE_MODE_TAB.register(

@@ -1,5 +1,6 @@
 package dev.thecoolerzubumafu.createworkbench;
 
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchBlock;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -13,11 +14,11 @@ import java.util.function.Supplier;
 
 public class AllBlocks {
 
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CreateWorkbench.MOD_ID);
+    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CreateWorkbench.ID);
 
-    public static final DeferredBlock<Block> WORKBENCH = registerBlock(
-            Blocks.WORKBENCH.value,
-            () -> new Block(
+    public static final DeferredBlock<WorkbenchBlock> WORKBENCH = registerBlock(
+            "workbench",
+            () -> new WorkbenchBlock(
                     BlockBehaviour.Properties
                             .of()
                             .instabreak()
@@ -44,16 +45,6 @@ public class AllBlocks {
 
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);
-    }
-
-    enum Blocks {
-        WORKBENCH("workbench");
-
-        private final String value;
-
-        Blocks(String value) {
-            this.value = value;
-        }
     }
 
 }

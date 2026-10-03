@@ -21,7 +21,7 @@ license="${mod_license}"
 [[mods]] #mandatory
 
 # The modid of the mod
-modId="${mod_id}" #mandatory
+modId="${ID}" #mandatory
 
 # The version number of the mod
 version="${mod_version}" #mandatory
@@ -49,7 +49,7 @@ description='''${mod_description}'''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.
 #[[mixins]]
-#config="${mod_id}.mixins.json"
+#config="${ID}.mixins.json"
 
 # The [[accessTransformers]] block allows you to declare where your AT file is.
 # If this block is omitted, a fallback attempt will be made to load an AT from META-INF/accesstransformer.cfg
@@ -66,7 +66,7 @@ versionRange = "[6.0.6,6.1.0)"
 ordering = "NONE"
 side = "BOTH"
 
-#[[dependencies.${mod_id}]] #optional
+#[[dependencies.${ID}]] #optional
 #    # the modid of the dependency
 #    modId="neoforge" #mandatory
 #    # The type of the dependency. Can be one of "required", "optional", "incompatible" or "discouraged" (case insensitive).
@@ -85,7 +85,7 @@ side = "BOTH"
 #    side="BOTH"
 #
 ## Here's another dependency
-#[[dependencies.${mod_id}]]
+#[[dependencies.${ID}]]
 #    modId="minecraft"
 #    type="required"
 #    # This version range declares a minimum of the current minecraft version up to but not including the next major version
@@ -96,5 +96,5 @@ side = "BOTH"
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.
-#[features.${mod_id}]
+#[features.${ID}]
 #openGLVersion="[3.2,)"

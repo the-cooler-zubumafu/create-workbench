@@ -3,12 +3,12 @@
   "category": "misc",
   "pattern": [
     "TTT",
-    "BKB",
-    "KKK"
+    "KBK",
+    "KBK"
   ],
   "key": {
     "T": {
-      "tag": "create:table_cloths"
+      "tag": "minecraft:wooden_slabs"
     },
     "B": {
       "tag": "create:toolboxes"

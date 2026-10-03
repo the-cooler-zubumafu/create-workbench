@@ -1,0 +1,124 @@
+package dev.thecoolerzubumafu.createworkbench.gametest;
+
+import dev.thecoolerzubumafu.createworkbench.AllBlocks;
+import dev.thecoolerzubumafu.createworkbench.AllDataComponents;
+import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchBlockEntity;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContents;
+
+import java.util.Map;
+import java.util.UUID;
+
+import com.simibubi.create.content.equipment.toolbox.ToolboxInventory;
+
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.StoredToolbox;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+
+@GameTestHolder(CreateWorkbench.ID)
+@PrefixGameTestTemplate(false)
+public class WorkbenchGameTests {
+
+	@GameTest(template = "empty")
+	public static void placedWorkbenchHasAnEmptyStorage(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		helper.assertTrue(be != null, "expected a workbench block entity");
+		helper.assertTrue(be.storage()
+			.size() == 0, "expected an empty storage");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void workbenchAcceptsAToolbox(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		boolean inserted = be.insertToolbox(com.simibubi.create.AllBlocks.TOOLBOXES.get(DyeColor.BLUE)
+			.asStack());
+
+		helper.assertTrue(inserted, "a toolbox should be accepted");
+		helper.assertTrue(be.storage()
+			.size() == 1, "storage should hold one toolbox");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void storedToolboxesPersist(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		be.insertToolbox(com.simibubi.create.AllBlocks.TOOLBOXES.get(DyeColor.ORANGE)
+			.asStack());
+
+		CompoundTag saved = be.saveWithoutMetadata(helper.getLevel()
+			.registryAccess());
+		WorkbenchBlockEntity restored = new WorkbenchBlockEntity(pos, be.getBlockState());
+		restored.loadWithComponents(saved, helper.getLevel()
+			.registryAccess());
+
+		helper.assertTrue(restored.storage()
+			.size() == 1, "stored toolboxes should survive a save/load round-trip");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void punchingAWorkbenchYieldsAnItemWithItsToolboxes(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		be.insertToolbox(com.simibubi.create.AllBlocks.TOOLBOXES.get(DyeColor.RED)
+			.asStack());
+
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		BlockState state = helper.getBlockState(pos);
+		state.attack(helper.getLevel(), helper.absolutePos(pos), player);
+
+		ItemStack held = player.getInventory()
+			.getItem(0);
+		helper.assertTrue(!held.isEmpty(), "expected a picked-up item");
+		helper.assertTrue(held.is(AllBlocks.WORKBENCH.get()
+			.asItem()), "expected the workbench item");
+		WorkbenchContents contents = held.get(AllDataComponents.WORKBENCH_CONTENTS.get());
+		helper.assertTrue(contents != null && contents.toolboxes()
+			.size() == 1, "expected the stored toolbox to be on the item");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void placingAWorkbenchRestoresItsToolboxes(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		ToolboxInventory inventory = new ToolboxInventory(null);
+		inventory.setStackInSlot(0, new ItemStack(Items.DIAMOND, 2));
+		ItemStack item = new ItemStack(AllBlocks.WORKBENCH.get());
+		item.set(AllDataComponents.WORKBENCH_CONTENTS.get(), new WorkbenchContents(
+			Map.of(0, new StoredToolbox(inventory, DyeColor.CYAN, UUID.randomUUID()))));
+
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		BlockState state = helper.getBlockState(pos);
+		state.getBlock()
+			.setPlacedBy(helper.getLevel(), helper.absolutePos(pos), state,
+				helper.makeMockPlayer(GameType.SURVIVAL), item);
+
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		helper.assertTrue(be.storage()
+			.size() == 1, "expected the stored toolbox to be restored on placement");
+		helper.assertTrue(be.storage()
+			.get(0)
+			.color() == DyeColor.CYAN, "expected the restored colour");
+		helper.succeed();
+	}
+}
