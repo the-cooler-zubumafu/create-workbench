@@ -1,9 +1,10 @@
 package dev.thecoolerzubumafu.createworkbench.content.equipment.workbench;
 
+import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
-public class WorkbenchItemHandler implements IItemHandler {
+public class WorkbenchItemHandler implements IItemHandlerModifiable {
 
 	private final WorkbenchStorage storage;
 	private final Runnable onChanged;
@@ -28,13 +29,18 @@ public class WorkbenchItemHandler implements IItemHandler {
 	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
 		if (stack.isEmpty())
 			return ItemStack.EMPTY;
-		if (slot < 0 || slot >= getSlots() || storage.get(slot) != null)
+		if (slot < 0 || slot >= getSlots() || storage.get(slot) != null) {
+			CreateWorkbench.LOGGER.debug("Workbench insert rejected: slot {} occupied or out of range", slot);
 			return stack;
+		}
 		StoredToolbox toolbox = ToolboxItems.snapshot(stack);
-		if (toolbox == null)
+		if (toolbox == null) {
+			CreateWorkbench.LOGGER.debug("Workbench insert rejected: slot {} (not a toolbox)", slot);
 			return stack;
+		}
 		if (!simulate) {
 			storage.insertAt(slot, toolbox);
+			CreateWorkbench.LOGGER.debug("Workbench inserted toolbox into slot {} (color={})", slot, toolbox.color());
 			onChanged.run();
 		}
 		return ItemStack.EMPTY;
@@ -48,8 +54,28 @@ public class WorkbenchItemHandler implements IItemHandler {
 		if (simulate)
 			return ToolboxItems.restore(toolbox);
 		StoredToolbox removed = storage.remove(slot);
+		CreateWorkbench.LOGGER.debug("Workbench extracted toolbox from slot {}", slot);
 		onChanged.run();
 		return removed == null ? ItemStack.EMPTY : ToolboxItems.restore(removed);
+	}
+
+	@Override
+	public void setStackInSlot(int slot, ItemStack stack) {
+		if (slot < 0 || slot >= getSlots())
+			return;
+		if (stack.isEmpty()) {
+			storage.remove(slot);
+			CreateWorkbench.LOGGER.debug("Workbench cleared slot {}", slot);
+		} else {
+			StoredToolbox toolbox = ToolboxItems.snapshot(stack);
+			if (toolbox == null) {
+				CreateWorkbench.LOGGER.debug("Workbench setStackInSlot ignored: slot {} (not a toolbox)", slot);
+				return;
+			}
+			storage.setAt(slot, toolbox);
+			CreateWorkbench.LOGGER.debug("Workbench set slot {} (color={})", slot, toolbox.color());
+		}
+		onChanged.run();
 	}
 
 	@Override

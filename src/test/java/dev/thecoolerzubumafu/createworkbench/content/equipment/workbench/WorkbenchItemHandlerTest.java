@@ -60,6 +60,30 @@ class WorkbenchItemHandlerTest {
 	}
 
 	@Test
+	void setStackInSlotPlacesReplacesAndClearsWithoutShifting() {
+		WorkbenchStorage storage = new WorkbenchStorage();
+		WorkbenchItemHandler handler = new WorkbenchItemHandler(storage, () -> {});
+
+		ItemStack red = ToolboxItems.restore(
+			new StoredToolbox(new ToolboxInventory(null), DyeColor.RED, UUID.randomUUID()));
+		handler.setStackInSlot(2, red);
+		assertEquals(1, storage.size());
+		assertEquals(DyeColor.RED, storage.get(2)
+			.color());
+
+		ItemStack blue = ToolboxItems.restore(
+			new StoredToolbox(new ToolboxInventory(null), DyeColor.BLUE, UUID.randomUUID()));
+		handler.setStackInSlot(2, blue);
+		assertEquals(1, storage.size(), "replacing does not add a slot");
+		assertEquals(DyeColor.BLUE, storage.get(2)
+			.color(), "the same slot is replaced");
+
+		handler.setStackInSlot(2, ItemStack.EMPTY);
+		assertNull(storage.get(2), "the slot is cleared");
+		assertEquals(0, storage.size());
+	}
+
+	@Test
 	void extractingReturnsTheToolboxWithContentsAndFreesTheSlot() {
 		WorkbenchStorage storage = new WorkbenchStorage();
 		WorkbenchItemHandler handler = new WorkbenchItemHandler(storage, () -> {});

@@ -1,6 +1,7 @@
 package dev.thecoolerzubumafu.createworkbench.content.equipment.workbench;
 
 import dev.thecoolerzubumafu.createworkbench.AllBlockEntities;
+import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class WorkbenchBlockEntity extends BlockEntity {
 
     private final WorkbenchStorage storage = new WorkbenchStorage();
+    private final WorkbenchItemHandler itemHandler = new WorkbenchItemHandler(storage, this::setChanged);
 
     public WorkbenchBlockEntity(BlockPos pos, BlockState state) {
         super(AllBlockEntities.WORKBENCH_BLOCKENTITY.get(), pos, state);
@@ -20,16 +22,24 @@ public class WorkbenchBlockEntity extends BlockEntity {
         return storage;
     }
 
+    public WorkbenchItemHandler itemHandler() {
+        return itemHandler;
+    }
+
     public boolean insertToolbox(ItemStack item) {
         boolean inserted = storage.insert(item);
-        if (inserted)
+        if (inserted) {
             setChanged();
+            CreateWorkbench.LOGGER.debug("Workbench at {} stored a toolbox", worldPosition);
+        }
         return inserted;
     }
 
     public void readContents(WorkbenchContents contents) {
         storage.setContents(contents);
         setChanged();
+        CreateWorkbench.LOGGER.debug("Workbench at {} restored {} toolboxes", worldPosition,
+                contents.toolboxes().size());
     }
 
     @Override

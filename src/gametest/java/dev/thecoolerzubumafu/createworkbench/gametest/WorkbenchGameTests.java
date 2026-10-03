@@ -12,11 +12,15 @@ import java.util.UUID;
 import com.simibubi.create.content.equipment.toolbox.ToolboxInventory;
 
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.StoredToolbox;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.ToolboxItems;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -119,6 +123,57 @@ public class WorkbenchGameTests {
 		helper.assertTrue(be.storage()
 			.get(0)
 			.color() == DyeColor.CYAN, "expected the restored colour");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void workbenchMenuHasEightToolboxSlotsAndPlayerInventory(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		BlockState state = helper.getBlockState(pos);
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+		MenuProvider provider = state.getMenuProvider(helper.getLevel(), helper.absolutePos(pos));
+		helper.assertTrue(provider != null, "expected the workbench to provide a menu");
+		AbstractContainerMenu menu = provider.createMenu(0, player.getInventory(), player);
+
+		helper.assertTrue(menu != null, "expected a menu instance");
+		helper.assertTrue(menu.slots.size() == WorkbenchStorage.CAPACITY + 36,
+			"expected 8 toolbox slots + 36 player slots, got " + menu.slots.size());
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void settingASlotStoresReplacesAndClearsWithoutLosingItems(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		BlockState state = helper.getBlockState(pos);
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		MenuProvider provider = state.getMenuProvider(helper.getLevel(), helper.absolutePos(pos));
+		AbstractContainerMenu menu = provider.createMenu(0, player.getInventory(), player);
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		ItemStack first = ToolboxItems.restore(
+			new StoredToolbox(new ToolboxInventory(null), DyeColor.RED, UUID.randomUUID()));
+		menu.getSlot(0)
+			.set(first);
+		helper.assertTrue(be.storage()
+			.size() == 1, "placing through the slot should store the toolbox");
+
+		ItemStack second = ToolboxItems.restore(
+			new StoredToolbox(new ToolboxInventory(null), DyeColor.BLUE, UUID.randomUUID()));
+		menu.getSlot(0)
+			.set(second);
+		helper.assertTrue(be.storage()
+			.size() == 1, "replacing must not lose or duplicate the slot");
+		helper.assertTrue(be.storage()
+			.get(0)
+			.color() == DyeColor.BLUE, "the slot should be replaced");
+
+		menu.getSlot(0)
+			.set(ItemStack.EMPTY);
+		helper.assertTrue(be.storage()
+			.size() == 0, "clearing the slot removes the toolbox");
 		helper.succeed();
 	}
 }

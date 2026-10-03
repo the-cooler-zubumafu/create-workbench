@@ -41,6 +41,12 @@ public class WorkbenchStorage {
 		return true;
 	}
 
+	public void setAt(int slot, StoredToolbox toolbox) {
+		if (slot < 0 || slot >= CAPACITY)
+			return;
+		toolboxes.put(slot, toolbox);
+	}
+
 	public StoredToolbox get(int slot) {
 		return toolboxes.get(slot);
 	}
