@@ -9,7 +9,6 @@ import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -66,7 +65,7 @@ public class WorkbenchBlockEntity extends BlockEntity {
                 .registryAccess());
         player.openMenu(new SimpleMenuProvider(
                         (id, inventory, p) -> new WorkbenchContentsMenu(id, inventory, holder, this, slot, stored),
-                        Component.translatable("block.createworkbench.workbench")),
+                        holder.getDisplayName()),
                 buffer -> {
                     buffer.writeBlockPos(worldPosition);
                     buffer.writeNbt(tag);
@@ -82,6 +81,8 @@ public class WorkbenchBlockEntity extends BlockEntity {
                         .defaultBlockState());
         holder.setLevel(level);
         holder.readInventory(stored.inventory());
+        if (stored.customName() != null)
+            holder.setCustomName(stored.customName());
         return holder;
     }
 

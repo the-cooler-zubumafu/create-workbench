@@ -11,6 +11,8 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.content.equipment.toolbox.ToolboxInventory;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -55,5 +57,21 @@ class ToolboxItemsTest {
 		assertEquals(7, restored.get(AllDataComponents.TOOLBOX_INVENTORY)
 			.getStackInSlot(0)
 			.getCount());
+	}
+
+	@Test
+	void snapshotAndRestorePreserveACustomName() {
+		ItemStack item = AllBlocks.TOOLBOXES.get(DyeColor.RED)
+			.asStack();
+		Component name = Component.literal("My Tools");
+		item.set(DataComponents.CUSTOM_NAME, name);
+
+		StoredToolbox stored = ToolboxItems.snapshot(item);
+
+		assertEquals(name, stored.customName());
+
+		ItemStack restored = ToolboxItems.restore(stored);
+
+		assertEquals(name, restored.get(DataComponents.CUSTOM_NAME));
 	}
 }

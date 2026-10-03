@@ -6,6 +6,8 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.content.equipment.toolbox.ToolboxInventory;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 
@@ -24,7 +26,8 @@ public final class ToolboxItems {
 		UUID id = item.get(AllDataComponents.TOOLBOX_UUID);
 		if (id == null)
 			id = UUID.randomUUID();
-		return new StoredToolbox(inventory, color, id);
+		Component customName = item.get(DataComponents.CUSTOM_NAME);
+		return new StoredToolbox(inventory, color, id, customName);
 	}
 
 	public static ItemStack restore(StoredToolbox toolbox) {
@@ -32,6 +35,8 @@ public final class ToolboxItems {
 			.asStack();
 		item.set(AllDataComponents.TOOLBOX_INVENTORY, toolbox.inventory());
 		item.set(AllDataComponents.TOOLBOX_UUID, toolbox.uuid());
+		if (toolbox.customName() != null)
+			item.set(DataComponents.CUSTOM_NAME, toolbox.customName());
 		return item;
 	}
 

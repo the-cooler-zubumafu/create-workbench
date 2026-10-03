@@ -19,6 +19,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -232,6 +233,25 @@ public class WorkbenchGameTests {
 		helper.assertTrue(menu.getSlot(0)
 			.getItem()
 			.is(Items.DIAMOND), "compartment 0 should show the stored item");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void openingAStoredToolboxUsesItsName(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		Component name = Component.literal("My Tools");
+		be.storage()
+			.setAt(0, new StoredToolbox(new ToolboxInventory(null), DyeColor.LIME, UUID.randomUUID(), name));
+
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		WorkbenchContentsMenu menu = be.createContentsMenu(0, player.getInventory(), 0);
+
+		helper.assertTrue(menu != null, "expected a contents menu");
+		helper.assertTrue(menu.contentHolder.getDisplayName()
+			.getString()
+			.equals("My Tools"), "expected the toolbox name to title the screen");
 		helper.succeed();
 	}
 }
