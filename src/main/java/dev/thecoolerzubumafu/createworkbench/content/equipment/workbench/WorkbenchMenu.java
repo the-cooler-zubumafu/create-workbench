@@ -3,6 +3,7 @@ package dev.thecoolerzubumafu.createworkbench.content.equipment.workbench;
 import dev.thecoolerzubumafu.createworkbench.AllBlocks;
 import dev.thecoolerzubumafu.createworkbench.AllMenuTypes;
 import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -18,11 +19,13 @@ public class WorkbenchMenu extends AbstractContainerMenu {
 
 	private final WorkbenchBlockEntity workbench;
 	private final ContainerLevelAccess access;
+	private final BlockPos workbenchPos;
 
 	public WorkbenchMenu(int id, Inventory playerInventory, WorkbenchBlockEntity workbench, ContainerLevelAccess access) {
 		super(AllMenuTypes.WORKBENCH.get(), id);
 		this.workbench = workbench;
 		this.access = access;
+		this.workbenchPos = workbench.getBlockPos();
 		addSlots(playerInventory, workbench.itemHandler());
 		CreateWorkbench.LOGGER.debug("Workbench menu opened at {}", workbench.getBlockPos());
 	}
@@ -31,8 +34,12 @@ public class WorkbenchMenu extends AbstractContainerMenu {
 		super(AllMenuTypes.WORKBENCH.get(), id);
 		this.workbench = null;
 		this.access = ContainerLevelAccess.NULL;
-		data.readBlockPos();
+		this.workbenchPos = data.readBlockPos();
 		addSlots(playerInventory, new ItemStackHandler(WorkbenchStorage.CAPACITY));
+	}
+
+	public BlockPos workbenchPos() {
+		return workbenchPos;
 	}
 
 	private void addSlots(Inventory playerInventory, IItemHandler handler) {
@@ -58,7 +65,23 @@ public class WorkbenchMenu extends AbstractContainerMenu {
 
 	@Override
 	public ItemStack quickMoveStack(Player player, int index) {
-		return ItemStack.EMPTY;
+		Slot slot = slots.get(index);
+		if (!slot.hasItem())
+			return ItemStack.EMPTY;
+		ItemStack stack = slot.getItem();
+		ItemStack moved = stack.copy();
+		if (index < WorkbenchStorage.CAPACITY) {
+			if (!moveItemStackTo(stack, WorkbenchStorage.CAPACITY, slots.size(), true))
+				return ItemStack.EMPTY;
+		} else {
+			if (!moveItemStackTo(stack, 0, WorkbenchStorage.CAPACITY, false))
+				return ItemStack.EMPTY;
+		}
+		if (stack.isEmpty())
+			slot.set(ItemStack.EMPTY);
+		else
+			slot.setChanged();
+		return moved;
 	}
 
 	@Override

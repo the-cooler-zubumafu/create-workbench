@@ -1,5 +1,7 @@
 package dev.thecoolerzubumafu.createworkbench;
 
+import com.simibubi.create.content.equipment.toolbox.ToolboxMenu;
+import com.simibubi.create.content.equipment.toolbox.ToolboxScreen;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -27,6 +29,7 @@ public class CreateWorkbenchClient {
     @SubscribeEvent
     static void registerScreens(RegisterMenuScreensEvent event) {
         event.register(AllMenuTypes.WORKBENCH.get(), WorkbenchScreen::new);
+        event.<ToolboxMenu, ToolboxScreen>register(AllMenuTypes.WORKBENCH_CONTENTS.get(), ToolboxScreen::new);
     }
 
     @SubscribeEvent

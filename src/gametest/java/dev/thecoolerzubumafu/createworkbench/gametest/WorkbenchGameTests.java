@@ -5,6 +5,7 @@ import dev.thecoolerzubumafu.createworkbench.AllDataComponents;
 import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchBlockEntity;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContents;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContentsMenu;
 
 import java.util.Map;
 import java.util.UUID;
@@ -174,6 +175,63 @@ public class WorkbenchGameTests {
 			.set(ItemStack.EMPTY);
 		helper.assertTrue(be.storage()
 			.size() == 0, "clearing the slot removes the toolbox");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void shiftClickStoresAndReturnsToolboxes(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		MenuProvider provider = helper.getBlockState(pos)
+			.getMenuProvider(helper.getLevel(), helper.absolutePos(pos));
+		AbstractContainerMenu menu = provider.createMenu(0, player.getInventory(), player);
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		ItemStack toolbox = ToolboxItems.restore(
+			new StoredToolbox(new ToolboxInventory(null), DyeColor.RED, UUID.randomUUID()));
+		menu.getSlot(8)
+			.set(toolbox);
+
+		menu.quickMoveStack(player, 8);
+		helper.assertTrue(be.storage()
+			.size() == 1, "shift-click should store the toolbox in the first free slot");
+		helper.assertTrue(menu.getSlot(8)
+			.getItem()
+			.isEmpty(), "the player inventory slot should be emptied");
+
+		menu.quickMoveStack(player, 0);
+		helper.assertTrue(be.storage()
+			.size() == 0, "shift-click should return the toolbox to the player inventory");
+		boolean returned = false;
+		for (int i = 8; i < menu.slots.size(); i++)
+			if (!menu.getSlot(i)
+				.getItem()
+				.isEmpty())
+				returned = true;
+		helper.assertTrue(returned, "the toolbox should be back in the player inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void openingAStoredToolboxExposesItsCompartments(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		ToolboxInventory inventory = new ToolboxInventory(null);
+		inventory.setStackInSlot(0, new ItemStack(Items.DIAMOND, 3));
+		be.storage()
+			.setAt(0, new StoredToolbox(inventory, DyeColor.LIME, UUID.randomUUID()));
+
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		WorkbenchContentsMenu menu = be.createContentsMenu(0, player.getInventory(), 0);
+
+		helper.assertTrue(menu != null, "expected a contents menu for the stored toolbox");
+		helper.assertTrue(menu.slots.size() == 68,
+			"expected Create's native toolbox layout (32 compartment + 36 inventory slots), got " + menu.slots.size());
+		helper.assertTrue(menu.getSlot(0)
+			.getItem()
+			.is(Items.DIAMOND), "compartment 0 should show the stored item");
 		helper.succeed();
 	}
 }

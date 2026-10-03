@@ -2,6 +2,7 @@ package dev.thecoolerzubumafu.createworkbench;
 
 import java.util.function.Supplier;
 
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContentsMenu;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
@@ -17,6 +18,11 @@ public class AllMenuTypes {
     public static final Supplier<MenuType<WorkbenchMenu>> WORKBENCH = MENU_TYPES.register(
             "workbench",
             () -> IMenuTypeExtension.create(WorkbenchMenu::new)
+    );
+
+    public static final Supplier<MenuType<WorkbenchContentsMenu>> WORKBENCH_CONTENTS = MENU_TYPES.register(
+            "workbench_contents",
+            () -> IMenuTypeExtension.create(WorkbenchContentsMenu::new)
     );
 
     public static void register(IEventBus eventBus) {

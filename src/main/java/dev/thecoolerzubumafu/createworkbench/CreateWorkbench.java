@@ -29,6 +29,7 @@ public class CreateWorkbench {
         AllBlockEntities.register(modEventBus);
         AllDataComponents.register(modEventBus);
         AllMenuTypes.register(modEventBus);
+        modEventBus.addListener(AllPackets::register);
 
         modEventBus.addListener(this::addCreative);
 
