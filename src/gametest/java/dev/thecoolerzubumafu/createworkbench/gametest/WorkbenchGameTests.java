@@ -252,6 +252,8 @@ public class WorkbenchGameTests {
 		helper.assertTrue(menu.contentHolder.getDisplayName()
 			.getString()
 			.equals("My Tools"), "expected the toolbox name to title the screen");
+		helper.assertTrue(menu.contentHolder.getBlockPos()
+			.equals(helper.absolutePos(pos)), "expected the contents holder at the workbench position");
 		helper.succeed();
 	}
 }

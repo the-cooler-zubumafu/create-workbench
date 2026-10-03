@@ -83,11 +83,9 @@ public class WorkbenchBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hitResult) {
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            MenuProvider provider = getMenuProvider(state, level, pos);
-            if (provider != null)
-                serverPlayer.openMenu(provider, buffer -> buffer.writeBlockPos(pos));
-        }
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer
+                && level.getBlockEntity(pos) instanceof WorkbenchBlockEntity workbench)
+            workbench.openMenu(serverPlayer);
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 

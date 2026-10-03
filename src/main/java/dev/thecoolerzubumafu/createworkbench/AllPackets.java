@@ -12,6 +12,11 @@ public class AllPackets {
                 OpenWorkbenchToolboxPacket.STREAM_CODEC,
                 OpenWorkbenchToolboxPacket::handle
         );
+        registrar.playToServer(
+                OpenWorkbenchMenuPacket.TYPE,
+                OpenWorkbenchMenuPacket.STREAM_CODEC,
+                OpenWorkbenchMenuPacket::handle
+        );
     }
 
 }

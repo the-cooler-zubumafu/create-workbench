@@ -9,9 +9,11 @@ import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -47,6 +49,14 @@ public class WorkbenchBlockEntity extends BlockEntity {
         setChanged();
         CreateWorkbench.LOGGER.debug("Workbench at {} restored {} toolboxes", worldPosition,
                 contents.toolboxes().size());
+    }
+
+    public void openMenu(ServerPlayer player) {
+        player.openMenu(new SimpleMenuProvider(
+                        (id, inventory, p) -> new WorkbenchMenu(id, inventory, this,
+                                ContainerLevelAccess.create(level, worldPosition)),
+                        Component.translatable("block.createworkbench.workbench")),
+                buffer -> buffer.writeBlockPos(worldPosition));
     }
 
     public WorkbenchContentsMenu createContentsMenu(int id, Inventory inventory, int slot) {
