@@ -14,6 +14,7 @@ import net.createmod.catnip.nbt.NBTHelper;
 import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Inventory;
@@ -159,7 +160,39 @@ public class WorkbenchHandler {
 		return false;
 	}
 
-	public static void unequip(ServerPlayer player, int hotbarSlot, boolean keepItems) {
+	/**
+	 * Deposits every binding this player has to the given Workbench back into its
+	 * Compartment and clears those bindings. Mirrors Create's {@code unequipTracked},
+	 * called before a Workbench is picked up so the returned items travel with it.
+	 * Returns true when at least one binding was removed.
+	 */
+	public static boolean unequipTracked(Player player, BlockPos pos) {
+		CompoundTag compound = player.getPersistentData()
+			.getCompound(DATA_KEY);
+		boolean changed = false;
+		for (int hotbarSlot = 0; hotbarSlot < BINDING_SLOTS; hotbarSlot++) {
+			String key = String.valueOf(hotbarSlot);
+			if (!compound.contains(key))
+				continue;
+			if (!NBTHelper.readBlockPos(compound.getCompound(key), "Pos")
+				.equals(pos))
+				continue;
+			unequip(player, hotbarSlot, false);
+			changed = true;
+		}
+		return changed;
+	}
+
+	/** Unequips every player in the level bound to this Workbench, syncing their data. */
+	public static void unequipTracked(Level level, BlockPos pos) {
+		if (level.isClientSide || !(level instanceof ServerLevel serverLevel))
+			return;
+		for (ServerPlayer player : serverLevel.players())
+			if (unequipTracked(player, pos))
+				syncData(player);
+	}
+
+	public static void unequip(Player player, int hotbarSlot, boolean keepItems) {
 		CompoundTag compound = player.getPersistentData()
 			.getCompound(DATA_KEY);
 		String key = String.valueOf(hotbarSlot);

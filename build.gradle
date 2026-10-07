@@ -26,6 +26,11 @@ base {
     archivesName = ID
 }
 
+// Keep Gradle's output out of OneDrive. Syncing the project folder locks files mid-build
+// (Windows: "Unable to delete directory build\classes\java\main") and has corrupted the
+// neoform cache. Using the user home keeps it on a local disk for both Windows and WSL.
+layout.buildDirectory = file("${System.getProperty('user.home')}/.gradle-builds/${rootProject.name}")
+
 // Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
@@ -101,7 +106,7 @@ neoForge {
 
             // Recommended logging level for the console
             // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            // Please read: https://stackoverflow.com/questions/2031163/how-to-set-the-different-logging-levels
             logLevel = org.slf4j.event.Level.DEBUG
         }
     }
@@ -190,7 +195,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
     inputs.properties replaceProperties
     expand replaceProperties
     from "src/main/templates"
-    into "build/generated/sources/modMetadata"
+    into layout.buildDirectory.dir("generated/sources/modMetadata")
 }
 // Include the output of "generateModMetadata" as an input directory for the build
 // this works with both building through Gradle and the IDE.
@@ -214,6 +219,16 @@ publishing {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// Force every launched JVM (dev client/server, game tests, mutation testing) onto the Java
+// 21 toolchain, regardless of the JDK running Gradle. A Gradle JVM on a newer JDK otherwise
+// makes NeoForge 1.21.1's dev-launch exit with code 1 before it logs anything.
+def javaToolchains = extensions.getByType(org.gradle.jvm.toolchain.JavaToolchainService)
+tasks.withType(JavaExec).configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 tasks.named('test', Test).configure {

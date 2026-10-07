@@ -22,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
@@ -415,6 +416,55 @@ public class WorkbenchGameTests {
 			.setItem(0, key);
 		helper.assertTrue(WorkbenchHandler.getNearest(player.level(), player, 8)
 			.contains(be), "the key holder should see the locked workbench");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void breakingReturnsBoundItemsToTheirCompartment(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+		ToolboxInventory inventory = new ToolboxInventory(null);
+		inventory.setStackInSlot(0, new ItemStack(Items.DIAMOND, 32));
+		be.storage()
+			.setAt(0, new StoredToolbox(inventory, DyeColor.BLUE, UUID.randomUUID()));
+
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.getInventory()
+			.setItem(0, new ItemStack(Items.DIAMOND, 32));
+		BlockPos abs = helper.absolutePos(pos);
+		CompoundTag data = new CompoundTag();
+		data.putInt("Slot", 0);
+		data.putInt("Compartment", 0);
+		data.put("Pos", NbtUtils.writeBlockPos(abs));
+		CompoundTag root = new CompoundTag();
+		root.put("0", data);
+		player.getPersistentData()
+			.put(WorkbenchHandler.DATA_KEY, root);
+
+		helper.assertTrue(WorkbenchHandler.unequipTracked(player, abs),
+			"the bound player should be unequipped");
+		helper.assertTrue(player.getInventory()
+			.getItem(0)
+			.isEmpty(), "the bound hotbar slot should be emptied");
+		helper.assertTrue(be.storage()
+			.get(0)
+			.inventory()
+			.takeFromCompartment(64, 0, true)
+			.getCount() == 64, "the deposited stack should be back in the compartment");
+		helper.assertTrue(player.getPersistentData()
+			.getCompound(WorkbenchHandler.DATA_KEY)
+			.isEmpty(), "the binding should be cleared");
+
+		ItemStack clone = be.getBlockState()
+			.getBlock()
+			.getCloneItemStack(helper.getLevel(), abs, be.getBlockState());
+		WorkbenchContents contents = clone.get(AllDataComponents.WORKBENCH_CONTENTS.get());
+		helper.assertTrue(contents != null && contents.toolboxes()
+			.get(0)
+			.inventory()
+			.takeFromCompartment(64, 0, true)
+			.getCount() == 64, "the picked-up workbench should carry the returned items");
 		helper.succeed();
 	}
 }

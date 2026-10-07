@@ -159,6 +159,7 @@ public class WorkbenchBlock extends BaseEntityBlock {
             return;
         }
 
+        WorkbenchHandler.unequipTracked(level, pos);
         ItemStack picked = getCloneItemStack(level, pos, state);
         level.destroyBlock(pos, false);
         if (level.getBlockState(pos) != state)
