@@ -1,21 +1,22 @@
-name: Build
+name: Integration tests
 
 on:
   push:
   pull_request:
 
 concurrency:
-  group: build-${{ github.ref }}
+  group: integration-tests-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  jar:
-    name: Build jar
+  integration-tests:
+    name: Game tests
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Generous: the first run downloads/generates the NeoForm artifacts.
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,12 +33,15 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+      - name: Run game tests
+        run: |
+          set -o pipefail
+          ./gradlew runGameTestServer --no-daemon 2>&1 | tee gametests.log
 
-      - name: Upload jar
+      - name: Upload game test log
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: createworkbench-jar
-          path: build/libs/*.jar
-          if-no-files-found: error
+          name: gametests-log
+          path: gametests.log
+          if-no-files-found: ignore

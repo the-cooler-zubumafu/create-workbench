@@ -6,6 +6,9 @@ concurrency:
   group: mutation-tests-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   mutation-tests:
     name: Mutation tests

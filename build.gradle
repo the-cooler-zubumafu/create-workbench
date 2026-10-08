@@ -29,7 +29,11 @@ base {
 // Keep Gradle's output out of OneDrive. Syncing the project folder locks files mid-build
 // (Windows: "Unable to delete directory build\classes\java\main") and has corrupted the
 // neoform cache. Using the user home keeps it on a local disk for both Windows and WSL.
-layout.buildDirectory = file("${System.getProperty('user.home')}/.gradle-builds/${rootProject.name}")
+// On CI there is no OneDrive, so build/ stays in the workspace and the workflow artifact
+// paths (build/libs, build/reports/pitest, ...) resolve as usual.
+layout.buildDirectory = System.getenv('CI')
+        ? file("${rootProject.projectDir}/build")
+        : file("${System.getProperty('user.home')}/.gradle-builds/${rootProject.name}")
 
 // Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
