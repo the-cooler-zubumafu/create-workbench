@@ -75,7 +75,7 @@ public class CreateWorkbenchClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         // Some client setup code
-        CreateWorkbench.LOGGER.info("HELLO FROM CLIENT SETUP");
-        CreateWorkbench.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        CreateWorkbench.LOGGER.debug("HELLO FROM CLIENT SETUP");
+        CreateWorkbench.LOGGER.debug("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
     }
 }

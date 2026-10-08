@@ -5,7 +5,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchHandler;
 import net.neoforged.neoforge.common.NeoForge;
@@ -37,8 +36,6 @@ public class CreateWorkbench {
         modEventBus.addListener(AllBlockEntities::registerCapabilities);
 
         modEventBus.addListener(this::addCreative);
-
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
@@ -55,7 +52,7 @@ public class CreateWorkbench {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
+        LOGGER.debug("HELLO from server starting");
     }
 
     @SubscribeEvent

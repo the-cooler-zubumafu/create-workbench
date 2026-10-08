@@ -262,11 +262,13 @@ tasks.register('mutationTest', JavaExec) {
                     'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlots',
                     'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlotItems',
                     'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchLock',
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchRange',
             ].join(','),
             '--targetTests', [
                     'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlotsTest',
                     'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchSlotItemsTest',
                     'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchLockTest',
+                    'dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchRangeTest',
             ].join(','),
             '--sourceDirs', 'src/main/java',
             '--classPath', projectClasspath.asPath,

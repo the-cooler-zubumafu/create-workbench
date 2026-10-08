@@ -1,25 +1,42 @@
+# Create: Workbench
 
-Installation information
-=======
+A NeoForge addon for **Create** that adds the **Workbench**: a placeable block
+that stores up to eight Toolboxes and serves their contents remotely, as if each
+Toolbox were placed.
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+- Insert whole Toolboxes in a management screen (right-click).
+- Open a stored Toolbox's native contents with Ctrl+left-click.
+- Press the radial keybind (**Grave**) to bind a hotbar slot to a stored
+  Toolbox's Compartment; auto-restock then works with Create's Toolbox parity.
+- **Lock** a Workbench with a **Workbench Key** (sneak-right-click); access
+  follows key possession.
+- Punch to pick the whole Workbench up with its contents, Shulker-style.
+- Works on Create contraptions.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+## Requirements
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+- Minecraft 1.21.1 (NeoForge 21.1.213)
+- [Create](https://modrinth.com/mod/create) `6.0.6+` (declared `[6.0.6,6.1.0)`)
+- Java 21
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+## Building & running
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+Use the Gradle wrapper from the repository root:
+
+```bash
+./gradlew build                 # compile + jar
+./gradlew test                  # unit tests
+./gradlew runGameTestServer     # headless server + gametests
+./gradlew runClient             # dev client
+./gradlew runServer             # dev dedicated server
+./gradlew runData               # data generators
+./gradlew mutationTest          # PIT mutation testing (90% gate)
+```
+
+The build directory is kept outside the project (see `AGENTS.md`), and all
+dev-launch JVMs are pinned to Java 21. `org.gradle.configuration-cache` is
+disabled because the project directory is shared across operating systems.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

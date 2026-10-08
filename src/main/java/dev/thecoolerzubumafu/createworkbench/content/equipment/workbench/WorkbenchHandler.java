@@ -280,8 +280,8 @@ public class WorkbenchHandler {
 	}
 
 	public static double getMaxRange(Player player) {
-		return AllConfigs.server().equipment.toolboxRange.get()
-			.doubleValue();
+		return WorkbenchRange.apply(AllConfigs.server().equipment.toolboxRange.get()
+			.doubleValue());
 	}
 
 	public static void syncData(ServerPlayer player) {
