@@ -42,6 +42,10 @@ public class WorkbenchMenu extends AbstractContainerMenu {
 		return workbenchPos;
 	}
 
+	public WorkbenchBlockEntity workbench() {
+		return workbench;
+	}
+
 	private void addSlots(Inventory playerInventory, IItemHandler handler) {
 		int[] xOffsets = {79, 112, 145, 151, 145, 112, 79, 73};
 		int[] yOffsets = {37, 31, 37, 70, 103, 109, 103, 70};
@@ -87,7 +91,9 @@ public class WorkbenchMenu extends AbstractContainerMenu {
 	@Override
 	public void removed(Player player) {
 		super.removed(player);
-		if (workbench != null)
+		if (workbench != null) {
+			workbench.stopOpen(player);
 			CreateWorkbench.LOGGER.debug("Workbench menu closed at {}", workbench.getBlockPos());
+		}
 	}
 }

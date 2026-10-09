@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "createworkbench:block/workbench"
-    }
+    "facing=north": { "model": "createworkbench:block/workbench_block" },
+    "facing=east": { "model": "createworkbench:block/workbench_block", "y": 90 },
+    "facing=south": { "model": "createworkbench:block/workbench_block", "y": 180 },
+    "facing=west": { "model": "createworkbench:block/workbench_block", "y": 270 }
   }
 }
