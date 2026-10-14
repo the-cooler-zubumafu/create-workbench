@@ -33,7 +33,7 @@ public class WorkbenchKeyItem extends Item {
 
 	@Override
 	public boolean isFoil(ItemStack stack) {
-		return lockIdOf(stack) != null;
+		return super.isFoil(stack) || lockIdOf(stack) != null;
 	}
 
 	@Override

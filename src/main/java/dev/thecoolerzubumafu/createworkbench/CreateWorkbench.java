@@ -8,7 +8,6 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchHandler;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -29,23 +28,15 @@ public class CreateWorkbench {
         AllBlocks.register(modEventBus);
         AllBlockEntities.register(modEventBus);
         AllDataComponents.register(modEventBus);
+        AllAttachments.register(modEventBus);
         AllMenuTypes.register(modEventBus);
         AllMountedStorageTypes.register(modEventBus);
         modEventBus.addListener(AllPackets::register);
         modEventBus.addListener(AllBlockEntities::registerCapabilities);
-
-        modEventBus.addListener(this::addCreative);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(AllMountedStorageTypes::associateBlocks);
-    }
-
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == AllCreativeModeTabs.CREATE_WORKBENCH_TAB) {
-            event.accept(AllItems.WORKBENCH_KEY);
-            event.accept(AllBlocks.WORKBENCH);
-        }
     }
 
     @SubscribeEvent

@@ -7,6 +7,8 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.HealthInsuranceHandler;
+
 import java.util.function.Supplier;
 
 public class AllCreativeModeTabs {
@@ -23,6 +25,9 @@ public class AllCreativeModeTabs {
                     .displayItems((itemDisplayParameters, output) -> {
                         output.accept(AllItems.WORKBENCH_KEY);
                         output.accept(AllBlocks.WORKBENCH);
+                        ItemStack book = HealthInsuranceHandler.healthInsuranceBook(itemDisplayParameters.holders());
+                        if (HealthInsuranceHandler.isHealthInsuranceBook(book))
+                            output.accept(book);
                     })
                     .build()
     );

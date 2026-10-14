@@ -8,8 +8,10 @@ import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.Workben
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContents;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchContentsMenu;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchHandler;
+import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.HealthInsuranceHandler;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchKeyItem;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,6 +22,7 @@ import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.Toolbox
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -28,15 +31,20 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -381,6 +389,67 @@ public class WorkbenchGameTests {
 		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
 		helper.assertTrue(key.doesSneakBypassUse(helper.getLevel(), helper.absolutePos(pos), player),
 			"the key must let a sneak-click pass through to the block's useItemOn");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void enchantedKeyGlints(GameTestHelper helper) {
+		ItemStack plain = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		helper.assertTrue(!plain.hasFoil(), "an unbound, unenchanted key should not glint");
+
+		ItemStack bound = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		WorkbenchKeyItem.setLockId(bound, UUID.randomUUID());
+		helper.assertTrue(bound.hasFoil(), "a bound key should glint");
+
+		ItemStack enchanted = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		HealthInsuranceHandler.applyHealthInsurance(enchanted, helper.getLevel()
+			.registryAccess());
+		helper.assertTrue(enchanted.hasFoil(), "an enchanted key should glint");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void healthInsuranceIsRegistered(GameTestHelper helper) {
+		helper.assertTrue(helper.getLevel()
+			.registryAccess()
+			.lookupOrThrow(Registries.ENCHANTMENT)
+			.get(HealthInsuranceHandler.HEALTH_INSURANCE)
+			.isPresent(), "the health insurance enchantment should be registered");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void healthInsuranceBookCarriesTheEnchantment(GameTestHelper helper) {
+		ItemStack book = HealthInsuranceHandler.healthInsuranceBook(helper.getLevel()
+			.registryAccess());
+		helper.assertTrue(book.is(Items.ENCHANTED_BOOK), "the enrichment book should be an enchanted book");
+		helper.assertTrue(HealthInsuranceHandler.isHealthInsuranceBook(book),
+			"the enrichment book should store the health insurance enchantment");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void enchantedKeyReturnsAfterDeath(GameTestHelper helper) {
+		Level level = helper.getLevel();
+		Player oldPlayer = helper.makeMockPlayer(GameType.SURVIVAL);
+		Player newPlayer = helper.makeMockPlayer(GameType.SURVIVAL);
+
+		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		HealthInsuranceHandler.applyHealthInsurance(key, level.registryAccess());
+		ItemEntity drop = new ItemEntity(level, 0.5, 1.5, 0.5, key);
+		ArrayList<ItemEntity> drops = new ArrayList<>();
+		drops.add(drop);
+
+		NeoForge.EVENT_BUS.post(new LivingDropsEvent(oldPlayer, level.damageSources()
+			.generic(), drops, false));
+		helper.assertTrue(drops.isEmpty(), "the protected key should be removed from the death drops");
+
+		NeoForge.EVENT_BUS.post(new PlayerEvent.Clone(newPlayer, oldPlayer, true));
+		boolean found = false;
+		for (ItemStack slot : newPlayer.getInventory().items)
+			if (slot.is(AllItems.WORKBENCH_KEY.get()))
+				found = true;
+		helper.assertTrue(found, "the protected key should return to the respawned player");
 		helper.succeed();
 	}
 
