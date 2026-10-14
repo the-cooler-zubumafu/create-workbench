@@ -3,7 +3,6 @@ package dev.thecoolerzubumafu.createworkbench.content.equipment.workbench;
 import com.mojang.serialization.MapCodec;
 
 import dev.thecoolerzubumafu.createworkbench.AllDataComponents;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -136,7 +135,14 @@ public class WorkbenchBlock extends BaseEntityBlock {
         if (player.isCrouching() && stack.getItem() instanceof WorkbenchKeyItem) {
             if (level.isClientSide)
                 return ItemInteractionResult.SUCCESS;
-            boolean flipped = workbench.toggleLock(stack);
+            boolean holdingStack = stack.getCount() > 1;
+            ItemStack keyToUse = holdingStack ? stack.copyWithCount(1) : stack;
+            boolean flipped = workbench.toggleLock(keyToUse);
+            if (flipped && holdingStack) {
+                stack.shrink(1);
+                player.getInventory()
+                        .placeItemBackInInventory(keyToUse);
+            }
             if (flipped)
                 player.displayClientMessage(
                         Component.translatable(workbench.isLocked() ? LOCKED_KEY : UNLOCKED_KEY), true);

@@ -165,6 +165,7 @@ public class WorkbenchBlockEntity extends BlockEntity {
         }
         if (lock.grantsAccess(WorkbenchKeyItem.lockIdOf(key))) {
             lock.unlock();
+            WorkbenchKeyItem.clearLockId(key);
             notifyStorageChanged();
             return true;
         }

@@ -13,7 +13,7 @@ public class AllItems {
             "workbench_key",
             () -> new WorkbenchKeyItem(
                     new Item.Properties()
-                            .stacksTo(1)
+                            .stacksTo(16)
             )
     );
 

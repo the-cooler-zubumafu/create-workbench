@@ -19,12 +19,15 @@ import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.StoredT
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.ToolboxItems;
 import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.WorkbenchStorage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.DyeColor;
@@ -32,6 +35,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
@@ -309,6 +314,73 @@ public class WorkbenchGameTests {
 		WorkbenchKeyItem.setLockId(otherKey, UUID.randomUUID());
 		helper.assertTrue(!be.toggleLock(otherKey), "a non-matching key must not toggle the lock");
 		helper.assertTrue(be.isLocked(), "the workbench should stay locked");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void blankKeysStackButBoundKeysDoNot(GameTestHelper helper) {
+		ItemStack blank = new ItemStack(AllItems.WORKBENCH_KEY.get(), 16);
+		helper.assertTrue(blank.getMaxStackSize() == 16, "a blank key should stack to 16");
+		helper.assertTrue(!blank.hasFoil(), "a blank key should not glint");
+
+		WorkbenchKeyItem.setLockId(blank, UUID.randomUUID());
+		helper.assertTrue(blank.getMaxStackSize() == 1, "a bound key should not stack");
+		helper.assertTrue(blank.hasFoil(), "a bound key should glint");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void unlockingReturnsTheKeyToBlank(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		be.toggleLock(key);
+		helper.assertTrue(WorkbenchKeyItem.lockIdOf(key) != null, "the key should be bound after locking");
+
+		helper.assertTrue(be.toggleLock(key), "the matching key should unlock the workbench");
+		helper.assertTrue(!be.isLocked(), "the workbench should be unlocked");
+		helper.assertTrue(WorkbenchKeyItem.lockIdOf(key) == null, "unlocking should return the key to blank");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void bindingAStackSplitsOneKey(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		WorkbenchBlockEntity be = (WorkbenchBlockEntity) helper.getBlockEntity(pos);
+
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+		player.setShiftKeyDown(true);
+		player.setPose(Pose.CROUCHING);
+		ItemStack held = new ItemStack(AllItems.WORKBENCH_KEY.get(), 16);
+		player.getInventory()
+			.setItem(0, held);
+
+		BlockState state = helper.getBlockState(pos);
+		state.useItemOn(held, helper.getLevel(), player, InteractionHand.MAIN_HAND,
+			new BlockHitResult(Vec3.atCenterOf(helper.absolutePos(pos)), Direction.UP, helper.absolutePos(pos), false));
+
+		helper.assertTrue(be.isLocked(), "the workbench should be locked");
+		helper.assertTrue(held.getCount() == 15, "fifteen blank keys should remain in the held stack");
+		boolean boundFound = false;
+		for (ItemStack slot : player.getInventory().items)
+			if (slot.getItem() instanceof WorkbenchKeyItem && WorkbenchKeyItem.lockIdOf(slot) != null)
+				boundFound = true;
+		helper.assertTrue(boundFound, "a bound key should have been placed in the inventory");
+		helper.succeed();
+	}
+
+	@GameTest(template = "empty")
+	public static void keyLetsSneakClicksReachTheBlock(GameTestHelper helper) {
+		BlockPos pos = new BlockPos(1, 1, 1);
+		helper.setBlock(pos, AllBlocks.WORKBENCH.get());
+		Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+		ItemStack key = new ItemStack(AllItems.WORKBENCH_KEY.get());
+		helper.assertTrue(key.doesSneakBypassUse(helper.getLevel(), helper.absolutePos(pos), player),
+			"the key must let a sneak-click pass through to the block's useItemOn");
 		helper.succeed();
 	}
 
