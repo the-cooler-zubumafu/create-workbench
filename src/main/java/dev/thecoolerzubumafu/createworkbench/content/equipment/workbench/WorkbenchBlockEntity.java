@@ -16,6 +16,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -25,6 +27,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.UUID;
 
@@ -56,10 +59,31 @@ public class WorkbenchBlockEntity extends BlockEntity {
                 sendOpenState();
         }
 
-        lidOpen.chase(openCount > 0 ? 1 : 0, 0.25f, Chaser.EXP);
-        drawerOpen.chase(openCount > 0 ? 1 : 0, 0.19f, Chaser.LINEAR);
+        if (level.isClientSide)
+            tickAudio();
+
+        lidOpen.chase(openCount > 0 ? 1 : 0, openCount > 0 ? 0.25f : 0.5f, Chaser.EXP);
+        drawerOpen.chase(openCount > 0 ? 1 : 0, openCount > 0 ? 0.19f : 0.38f, Chaser.LINEAR);
         lidOpen.tickChaser();
         drawerOpen.tickChaser();
+    }
+
+    private void tickAudio() {
+        Vec3 vec = Vec3.atCenterOf(worldPosition);
+        if (lidOpen.settled()) {
+            if (openCount > 0 && lidOpen.getChaseTarget() == 0) {
+                level.playLocalSound(vec.x, vec.y, vec.z, SoundEvents.IRON_DOOR_OPEN, SoundSource.BLOCKS, 0.25F,
+                        level.random.nextFloat() * 0.1F + 1.2F, true);
+                level.playLocalSound(vec.x, vec.y, vec.z, SoundEvents.CHEST_OPEN, SoundSource.BLOCKS, 0.1F,
+                        level.random.nextFloat() * 0.1F + 1.1F, true);
+            }
+            if (openCount == 0 && lidOpen.getChaseTarget() == 1)
+                level.playLocalSound(vec.x, vec.y, vec.z, SoundEvents.CHEST_CLOSE, SoundSource.BLOCKS, 0.1F,
+                        level.random.nextFloat() * 0.1F + 1.1F, true);
+        } else if (openCount == 0 && lidOpen.getChaseTarget() == 0 && lidOpen.getValue(0) > 1 / 16f
+                && lidOpen.getValue(1) < 1 / 16f)
+            level.playLocalSound(vec.x, vec.y, vec.z, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 0.25F,
+                    level.random.nextFloat() * 0.1F + 1.2F, true);
     }
 
     private int countOpenMenus() {
