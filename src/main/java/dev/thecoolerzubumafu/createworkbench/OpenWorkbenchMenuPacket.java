@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record OpenWorkbenchMenuPacket(BlockPos pos) implements CustomPacketPayload {
-
     public static final CustomPacketPayload.Type<OpenWorkbenchMenuPacket> TYPE =
             new CustomPacketPayload.Type<>(
                     ResourceLocation.fromNamespaceAndPath(CreateWorkbench.ID, "open_workbench_menu"));

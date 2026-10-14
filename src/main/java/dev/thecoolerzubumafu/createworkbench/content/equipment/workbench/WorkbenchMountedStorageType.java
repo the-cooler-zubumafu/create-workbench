@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class WorkbenchMountedStorageType extends MountedItemStorageType<WorkbenchMountedStorage> {
-
 	public WorkbenchMountedStorageType() {
 		super(WorkbenchMountedStorage.CODEC);
 	}

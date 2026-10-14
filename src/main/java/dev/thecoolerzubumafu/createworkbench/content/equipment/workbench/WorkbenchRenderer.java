@@ -10,15 +10,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 
-/**
- * Draws the moving parts of the Workbench. The static body is the block model; here
- * the two top lids slide apart on their local X axis and the two drawer halves (each
- * with its own chaser) slide out on their local -Z axis, all oriented by the block's
- * FACING. Driven by the BE's lerped values, so the motion eases in/out and is smooth
- * at any framerate.
- */
 public class WorkbenchRenderer implements BlockEntityRenderer<WorkbenchBlockEntity> {
-
     private static final float LID_SLIDE = 6f / 16f;
     private static final float DRAWER_SLIDE = 4f / 16f;
 
@@ -35,8 +27,7 @@ public class WorkbenchRenderer implements BlockEntityRenderer<WorkbenchBlockEnti
         Direction facing = state.getValue(WorkbenchBlock.FACING)
                 .getOpposite();
         float lidOpen = workbench.lidOpen.getValue(partialTick);
-        float drawerLeft = workbench.drawerLeftOpen.getValue(partialTick);
-        float drawerRight = workbench.drawerRightOpen.getValue(partialTick);
+        float drawer = workbench.drawerOpen.getValue(partialTick);
 
         VertexConsumer builder = buffer.getBuffer(RenderType.cutoutMipped());
 
@@ -57,19 +48,11 @@ public class WorkbenchRenderer implements BlockEntityRenderer<WorkbenchBlockEnti
                 .light(light)
                 .renderInto(ms, builder);
 
-        CachedBuffers.partial(WorkbenchPartialModels.DRAWER_LEFT, state)
+        CachedBuffers.partial(WorkbenchPartialModels.DRAWER, state)
                 .center()
                 .rotateYDegrees(-facing.toYRot())
                 .uncenter()
-                .translate(0, 0, -DRAWER_SLIDE * drawerLeft)
-                .light(light)
-                .renderInto(ms, builder);
-
-        CachedBuffers.partial(WorkbenchPartialModels.DRAWER_RIGHT, state)
-                .center()
-                .rotateYDegrees(-facing.toYRot())
-                .uncenter()
-                .translate(0, 0, -DRAWER_SLIDE * drawerRight)
+                .translate(0, 0, -DRAWER_SLIDE * drawer)
                 .light(light)
                 .renderInto(ms, builder);
     }

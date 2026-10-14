@@ -25,7 +25,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class WorkbenchScreen extends AbstractSimiContainerScreen<WorkbenchMenu> {
-
 	private static final AllGuiTextures BG = AllGuiTextures.TOOLBOX;
 	private static final AllGuiTextures PLAYER = AllGuiTextures.PLAYER_INVENTORY;
 
@@ -66,13 +65,6 @@ public class WorkbenchScreen extends AbstractSimiContainerScreen<WorkbenchMenu> 
 		renderWorkbench(graphics, x + BG.getWidth() + 50, y + BG.getHeight() + 12);
 	}
 
-	/**
-	 * Draws the Workbench model next to the screen and animates it exactly like the
-	 * placed block, mirroring Create's Toolbox preview: the block entity renderer is
-	 * invoked in the GUI with the Workbench's {@code lidOpen}/<code>drawerLeftOpen</code>/
-	 * <code>drawerRightOpen</code> lerped values, so right-clicking plays the same open motion as the world block.
-	 * Rendered in its default orientation for a consistent isometric view.
-	 */
 	private void renderWorkbench(GuiGraphics graphics, int x, int y) {
 		WorkbenchBlockEntity workbench = workbench();
 		if (workbench == null)

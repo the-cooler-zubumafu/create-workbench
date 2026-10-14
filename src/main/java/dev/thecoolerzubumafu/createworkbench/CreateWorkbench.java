@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 
 @Mod(CreateWorkbench.ID)
 public class CreateWorkbench {
-
     public static final String ID = "createworkbench";
     public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -51,7 +50,6 @@ public class CreateWorkbench {
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
         LOGGER.debug("HELLO from server starting");
     }
 

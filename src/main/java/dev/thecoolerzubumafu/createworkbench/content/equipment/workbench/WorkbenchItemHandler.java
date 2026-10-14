@@ -4,11 +4,7 @@ import dev.thecoolerzubumafu.createworkbench.CreateWorkbench;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 
-/**
- * Minecraft/NeoForge adapter over the pure {@link WorkbenchSlotItems} rules.
- */
 public class WorkbenchItemHandler implements IItemHandlerModifiable {
-
 	private final WorkbenchSlotItems<ItemStack, StoredToolbox> rules;
 
 	public WorkbenchItemHandler(WorkbenchStorage storage, Runnable onChanged) {

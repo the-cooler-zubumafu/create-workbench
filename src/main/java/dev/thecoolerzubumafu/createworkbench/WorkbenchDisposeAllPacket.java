@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record WorkbenchDisposeAllPacket(BlockPos workbenchPos) implements CustomPacketPayload {
-
     public static final CustomPacketPayload.Type<WorkbenchDisposeAllPacket> TYPE =
             new CustomPacketPayload.Type<>(
                     ResourceLocation.fromNamespaceAndPath(CreateWorkbench.ID, "workbench_dispose_all"));

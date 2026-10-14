@@ -17,7 +17,6 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.DyeColor;
 
 public record StoredToolbox(ToolboxInventory inventory, DyeColor color, UUID uuid, Component customName) {
-
 	public StoredToolbox(ToolboxInventory inventory, DyeColor color, UUID uuid) {
 		this(inventory, color, uuid, null);
 	}

@@ -33,12 +33,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
-/**
- * Client glue for the Workbench Radial: opens it on the keybind, draws the hotbar
- * binding overlay and implements pick-block compatibility.
- */
 public class WorkbenchHandlerClient {
-
 	public static final LayeredDraw.Layer OVERLAY = WorkbenchHandlerClient::renderOverlay;
 
 	static int COOLDOWN = 0;

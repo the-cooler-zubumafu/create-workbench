@@ -25,14 +25,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
-/**
- * Server (and client-side list) bookkeeping for Workbenches: a registry of loaded
- * Workbenches, the per-player binding data, the restock loop and the nearest query.
- * Mirrors Create's {@code ToolboxHandler}, but binds a (Workbench, Stored Toolbox,
- * Compartment) rather than a standalone Toolbox.
- */
 public class WorkbenchHandler {
-
 	public static final String DATA_KEY = "CreateWorkbenchData";
 	public static final int BINDING_SLOTS = 9;
 
@@ -112,10 +105,6 @@ public class WorkbenchHandler {
 			syncData(serverPlayer);
 	}
 
-	/**
-	 * Tops up or trims the bound hotbar slot from its bound Compartment. Returns true
-	 * when the binding is no longer valid and should be dropped.
-	 */
 	public static boolean restock(Player player, WorkbenchBlockEntity be, int slot, int compartment, int hotbarSlot) {
 		if (slot < 0 || slot >= WorkbenchStorage.CAPACITY || compartment < 0 || compartment >= 8)
 			return true;
@@ -160,12 +149,6 @@ public class WorkbenchHandler {
 		return false;
 	}
 
-	/**
-	 * Deposits every binding this player has to the given Workbench back into its
-	 * Compartment and clears those bindings. Mirrors Create's {@code unequipTracked},
-	 * called before a Workbench is picked up so the returned items travel with it.
-	 * Returns true when at least one binding was removed.
-	 */
 	public static boolean unequipTracked(Player player, BlockPos pos) {
 		CompoundTag compound = player.getPersistentData()
 			.getCompound(DATA_KEY);
@@ -183,7 +166,6 @@ public class WorkbenchHandler {
 		return changed;
 	}
 
-	/** Unequips every player in the level bound to this Workbench, syncing their data. */
 	public static void unequipTracked(Level level, BlockPos pos) {
 		if (level.isClientSide || !(level instanceof ServerLevel serverLevel))
 			return;
@@ -228,7 +210,6 @@ public class WorkbenchHandler {
 		}
 	}
 
-	/** Inserts a stack into the Stored Toolboxes' defined Compartments, returning leftovers. */
 	public static ItemStack deposit(WorkbenchBlockEntity be, ItemStack stack) {
 		ItemStack remaining = stack;
 		for (StoredToolbox stored : be.storage()

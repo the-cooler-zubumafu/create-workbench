@@ -3,12 +3,7 @@ package dev.thecoolerzubumafu.createworkbench.content.equipment.workbench;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Pure lock state of a Workbench: access follows possession of a Key carrying the
- * matching Lock ID. No Minecraft types.
- */
 public final class WorkbenchLock {
-
 	private UUID lockId;
 
 	public boolean isLocked() {

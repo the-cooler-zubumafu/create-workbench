@@ -11,7 +11,6 @@ import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class AllMenuTypes {
-
     public static final DeferredRegister<MenuType<?>> MENU_TYPES =
             DeferredRegister.create(Registries.MENU, CreateWorkbench.ID);
 
@@ -28,5 +27,4 @@ public class AllMenuTypes {
     public static void register(IEventBus eventBus) {
         MENU_TYPES.register(eventBus);
     }
-
 }

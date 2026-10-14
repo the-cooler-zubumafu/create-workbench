@@ -7,7 +7,6 @@ import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class AllItems {
-
     public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CreateWorkbench.ID);
 
     public static final DeferredItem<WorkbenchKeyItem> WORKBENCH_KEY = ITEMS.register(
@@ -21,5 +20,4 @@ public class AllItems {
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }
-
 }

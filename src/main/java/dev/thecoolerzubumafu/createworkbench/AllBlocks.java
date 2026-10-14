@@ -13,7 +13,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;
 
 public class AllBlocks {
-
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(CreateWorkbench.ID);
 
     public static final DeferredBlock<WorkbenchBlock> WORKBENCH = registerBlock(
@@ -46,5 +45,4 @@ public class AllBlocks {
     public static void register(IEventBus eventBus) {
         BLOCKS.register(eventBus);
     }
-
 }

@@ -9,12 +9,7 @@ import dev.thecoolerzubumafu.createworkbench.content.equipment.workbench.Workben
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-/**
- * Registers our contraption-mounted storage type into Create's built-in registry and
- * associates it with the Workbench block.
- */
 public class AllMountedStorageTypes {
-
     public static final DeferredRegister<MountedItemStorageType<?>> MOUNTED_ITEM_STORAGE_TYPES =
             DeferredRegister.create(CreateRegistries.MOUNTED_ITEM_STORAGE_TYPE, CreateWorkbench.ID);
 

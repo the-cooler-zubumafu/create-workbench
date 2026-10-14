@@ -13,7 +13,6 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 public record WorkbenchContents(Map<Integer, StoredToolbox> toolboxes) {
-
 	public static final Codec<WorkbenchContents> CODEC = SlotContent.CODEC.listOf()
 		.xmap(WorkbenchContents::fromList, WorkbenchContents::toList);
 
@@ -36,7 +35,6 @@ public record WorkbenchContents(Map<Integer, StoredToolbox> toolboxes) {
 	}
 
 	record SlotContent(int slot, StoredToolbox toolbox) {
-
 		static final Codec<SlotContent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			Codec.INT.fieldOf("slot")
 				.forGetter(SlotContent::slot),

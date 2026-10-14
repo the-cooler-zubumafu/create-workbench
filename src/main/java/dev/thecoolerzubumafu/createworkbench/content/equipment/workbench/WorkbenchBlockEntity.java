@@ -29,16 +29,13 @@ import net.minecraft.world.phys.AABB;
 import java.util.UUID;
 
 public class WorkbenchBlockEntity extends BlockEntity {
-
     private final WorkbenchStorage storage = new WorkbenchStorage();
     private final WorkbenchItemHandler itemHandler = new WorkbenchItemHandler(storage, this::notifyStorageChanged);
     private final WorkbenchLock lock = new WorkbenchLock();
 
     public final LerpedFloat lidOpen = LerpedFloat.linear()
             .startWithValue(0);
-    public final LerpedFloat drawerLeftOpen = LerpedFloat.linear()
-            .startWithValue(0);
-    public final LerpedFloat drawerRightOpen = LerpedFloat.linear()
+    public final LerpedFloat drawerOpen = LerpedFloat.linear()
             .startWithValue(0);
 
     private int openCount;
@@ -48,11 +45,6 @@ public class WorkbenchBlockEntity extends BlockEntity {
         super(AllBlockEntities.WORKBENCH_BLOCKENTITY.get(), pos, state);
     }
 
-    /**
-     * Chases the lid/drawer animation toward whether any player currently has this
-     * Workbench's menu open. The server re-derives the open count on a slow timer so
-     * menu closes on disconnect or unload can never leave it stuck open.
-     */
     public void tick() {
         if (level == null)
             return;
@@ -65,11 +57,9 @@ public class WorkbenchBlockEntity extends BlockEntity {
         }
 
         lidOpen.chase(openCount > 0 ? 1 : 0, 0.25f, Chaser.EXP);
-        drawerLeftOpen.chase(openCount > 0 ? 1 : 0, 0.22f, Chaser.LINEAR);
-        drawerRightOpen.chase(openCount > 0 ? 1 : 0, 0.16f, Chaser.LINEAR);
+        drawerOpen.chase(openCount > 0 ? 1 : 0, 0.19f, Chaser.LINEAR);
         lidOpen.tickChaser();
-        drawerLeftOpen.tickChaser();
-        drawerRightOpen.tickChaser();
+        drawerOpen.tickChaser();
     }
 
     private int countOpenMenus() {
@@ -80,7 +70,6 @@ public class WorkbenchBlockEntity extends BlockEntity {
         return count;
     }
 
-    /** Called when a player opens the Workbench menu; opens the cart. */
     public void startOpen(Player player) {
         if (level == null || level.isClientSide || player.isSpectator())
             return;
@@ -90,7 +79,6 @@ public class WorkbenchBlockEntity extends BlockEntity {
         sendOpenState();
     }
 
-    /** Called when a player closes the Workbench menu; retracts the cart when none remain. */
     public void stopOpen(Player player) {
         if (level == null || level.isClientSide || player.isSpectator())
             return;
@@ -141,11 +129,6 @@ public class WorkbenchBlockEntity extends BlockEntity {
         notifyStorageChanged();
     }
 
-    /**
-     * Sneak-right-click with a Workbench Key toggles the lock. Returns true when the
-     * state flipped: an unlocked Workbench locks (issuing a fresh Lock ID to the key),
-     * a locked one unlocks when the key matches.
-     */
     public boolean toggleLock(ItemStack key) {
         if (!(key.getItem() instanceof WorkbenchKeyItem))
             return false;
@@ -180,10 +163,6 @@ public class WorkbenchBlockEntity extends BlockEntity {
                 contents.toolboxes().size());
     }
 
-    /**
-     * Marks the BE dirty and pushes its contents to nearby clients (used by restock,
-     * contents edit and lock changes so rendering/bindings stay in sync).
-     */
     public void notifyStorageChanged() {
         setChanged();
         if (level != null && !level.isClientSide)

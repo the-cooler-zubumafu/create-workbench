@@ -26,7 +26,6 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record WorkbenchEquipPacket(BlockPos workbenchPos, int slot, int compartment, int hotbarSlot)
         implements CustomPacketPayload {
-
     public static final CustomPacketPayload.Type<WorkbenchEquipPacket> TYPE =
             new CustomPacketPayload.Type<>(
                     ResourceLocation.fromNamespaceAndPath(CreateWorkbench.ID, "workbench_equip"));

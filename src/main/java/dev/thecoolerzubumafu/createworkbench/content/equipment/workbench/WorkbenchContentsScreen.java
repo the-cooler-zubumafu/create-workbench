@@ -17,14 +17,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-/**
- * Create's {@link ToolboxScreen} for a stored Toolbox. Its confirm ("check") button is
- * re-wired to return to the Workbench menu, and its preview model is animated open since
- * the stored Toolbox's block entity is not ticked by any level. The open sound is played
- * on selection (see {@link WorkbenchScreen}); the close sound is kept here.
- */
 public class WorkbenchContentsScreen extends ToolboxScreen {
-
 	public WorkbenchContentsScreen(ToolboxMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, title);
 	}

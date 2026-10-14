@@ -37,21 +37,20 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
 public class WorkbenchBlock extends BaseEntityBlock {
-
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    public static final VoxelShape SHAPE = Block.box(
-            1.0D,
-            0.0D,
-            2.0D,
-            15.0D,
-            14.0D,
-            15.0D
+    public static final VoxelShape SHAPE = Shapes.or(
+            Block.box(1, 0, 2, 2, 7, 3),
+            Block.box(14, 0, 2, 15, 7, 3),
+            Block.box(1, 0, 13, 2, 7, 14),
+            Block.box(14, 0, 13, 15, 7, 14),
+            Block.box(1, 7, 2, 15, 13, 14)
     );
     public static final MapCodec<WorkbenchBlock> CODEC = simpleCodec(WorkbenchBlock::new);
 
@@ -95,6 +94,11 @@ public class WorkbenchBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return SHAPE;
+    }
+
+    @Override
+    protected VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 

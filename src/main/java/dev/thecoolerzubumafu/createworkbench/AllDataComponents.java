@@ -11,7 +11,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class AllDataComponents {
-
     public static final DeferredRegister.DataComponents DATA_COMPONENTS =
             DeferredRegister.createDataComponents(CreateWorkbench.ID);
 
@@ -34,5 +33,4 @@ public class AllDataComponents {
     public static void register(IEventBus eventBus) {
         DATA_COMPONENTS.register(eventBus);
     }
-
 }

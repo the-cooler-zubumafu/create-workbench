@@ -12,7 +12,6 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 
 public final class ToolboxItems {
-
 	private ToolboxItems() {
 	}
 

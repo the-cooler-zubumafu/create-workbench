@@ -11,7 +11,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record OpenWorkbenchToolboxPacket(BlockPos pos, int slot) implements CustomPacketPayload {
-
     public static final CustomPacketPayload.Type<OpenWorkbenchToolboxPacket> TYPE =
             new CustomPacketPayload.Type<>(
                     ResourceLocation.fromNamespaceAndPath(CreateWorkbench.ID, "open_workbench_toolbox"));

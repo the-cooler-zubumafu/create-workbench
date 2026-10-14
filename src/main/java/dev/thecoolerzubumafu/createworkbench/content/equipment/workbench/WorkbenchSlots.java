@@ -4,12 +4,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Pure slot bookkeeping for a Workbench: eight fixed slots (0..7) that may hold a
- * value, with holes. No Minecraft types.
- */
 public class WorkbenchSlots<T> {
-
 	public static final int CAPACITY = 8;
 
 	private final Map<Integer, T> slots = new LinkedHashMap<>();

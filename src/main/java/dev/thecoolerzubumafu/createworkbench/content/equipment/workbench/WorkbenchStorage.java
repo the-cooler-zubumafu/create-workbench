@@ -7,12 +7,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * Minecraft-facing storage: {@link WorkbenchSlots} of {@link StoredToolbox} plus the
- * item and NBT adapters. The slot rules live in the pure parent class.
- */
 public class WorkbenchStorage extends WorkbenchSlots<StoredToolbox> {
-
 	public boolean insert(ItemStack item) {
 		StoredToolbox toolbox = ToolboxItems.snapshot(item);
 		return toolbox != null && insert(toolbox);

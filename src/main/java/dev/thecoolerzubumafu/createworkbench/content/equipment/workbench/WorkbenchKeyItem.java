@@ -7,12 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * A key carries a Lock ID; possession of a key whose Lock ID matches a Workbench's
- * grants Access to that Workbench.
- */
 public class WorkbenchKeyItem extends Item {
-
 	public WorkbenchKeyItem(Properties properties) {
 		super(properties);
 	}

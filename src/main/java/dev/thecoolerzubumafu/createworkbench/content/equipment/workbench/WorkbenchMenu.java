@@ -16,7 +16,6 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class WorkbenchMenu extends AbstractContainerMenu {
-
 	private final WorkbenchBlockEntity workbench;
 	private final ContainerLevelAccess access;
 	private final BlockPos workbenchPos;

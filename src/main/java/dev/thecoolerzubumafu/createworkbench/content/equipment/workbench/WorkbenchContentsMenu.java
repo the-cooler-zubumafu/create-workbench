@@ -15,7 +15,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 
 public class WorkbenchContentsMenu extends ToolboxMenu {
-
 	private final WorkbenchBlockEntity workbench;
 	private final StoredToolbox stored;
 	private final int slot;

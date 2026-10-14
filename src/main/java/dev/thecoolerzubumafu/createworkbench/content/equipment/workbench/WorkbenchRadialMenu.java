@@ -31,13 +31,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
-/**
- * Fork of Create's {@code RadialToolboxMenu} fed with Stored Toolboxes of nearby
- * accessible Workbenches. Choose a Stored Toolbox, then a Compartment, to Bind the
- * current hotbar slot.
- */
 public class WorkbenchRadialMenu extends AbstractSimiScreen {
-
 	public record Entry(WorkbenchBlockEntity workbench, int slot, StoredToolbox stored) {
 	}
 
@@ -88,7 +82,6 @@ public class WorkbenchRadialMenu extends AbstractSimiScreen {
 		Component tip = null;
 
 		if (state == State.DETACH) {
-
 			tip = CreateLang.translateDirect("toolbox.outOfRange");
 			if (hoveredX > -20 && hoveredX < 20 && hoveredY > -80 && hoveredY < -20)
 				hoveredSlot = UNEQUIP;
@@ -111,9 +104,7 @@ public class WorkbenchRadialMenu extends AbstractSimiScreen {
 					.withStyle(ChatFormatting.GOLD);
 			}
 			ms.popPose();
-
 		} else {
-
 			if (hoveredX > 60 && hoveredX < 100 && hoveredY > -20 && hoveredY < 20)
 				hoveredSlot = DEPOSIT;
 
@@ -154,9 +145,7 @@ public class WorkbenchRadialMenu extends AbstractSimiScreen {
 						}
 					} else
 						AllGuiTextures.TOOLBELT_EMPTY_SLOT.render(graphics, 0, 0);
-
 				} else if (state == State.SELECT_BOX) {
-
 					if (slot < entries.size()) {
 						AllGuiTextures.TOOLBELT_SLOT.render(graphics, 0, 0);
 						GuiGameElement.of(ToolboxItems.restore(entries.get(slot)
@@ -171,7 +160,6 @@ public class WorkbenchRadialMenu extends AbstractSimiScreen {
 						}
 					} else
 						AllGuiTextures.TOOLBELT_EMPTY_SLOT.render(graphics, 0, 0);
-
 				}
 
 				ms.popPose();

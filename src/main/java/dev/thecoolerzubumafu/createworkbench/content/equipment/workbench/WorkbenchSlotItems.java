@@ -1,11 +1,6 @@
 package dev.thecoolerzubumafu.createworkbench.content.equipment.workbench;
 
-/**
- * Pure bridging rules between an item form and {@link WorkbenchSlots}: only Toolboxes
- * are accepted, one per slot, occupied slots reject, empty clears. No Minecraft types.
- */
 public class WorkbenchSlotItems<T, S> {
-
 	private final WorkbenchSlots<S> slots;
 	private final ItemAdapter<T, S> items;
 	private final Runnable onChanged;

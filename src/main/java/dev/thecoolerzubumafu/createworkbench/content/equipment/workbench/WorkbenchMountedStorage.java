@@ -17,14 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 
-/**
- * Contraption-mounted view of a Workbench: all eight Stored Toolboxes flattened into
- * one handler (32 slots each, 256 total), preserving each Toolbox's own filters and
- * identity. The stored records share their {@link ToolboxInventory} instances with the
- * block entity, which is removed while the contraption moves.
- */
 public class WorkbenchMountedStorage extends MountedItemStorage {
-
 	public static final int SLOTS_PER_TOOLBOX = 8 * ToolboxInventory.STACKS_PER_COMPARTMENT;
 	public static final int TOTAL_SLOTS = WorkbenchStorage.CAPACITY * SLOTS_PER_TOOLBOX;
 
